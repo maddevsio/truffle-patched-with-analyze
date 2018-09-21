@@ -1,8 +1,8 @@
 const path = require('path')
 const fs = require('fs')
 const armlet = require('armlet')
+const mythril = require('./mythril');
 const trufstuf = require('./trufstuf');
-const srcmap = require('./srcmap.js')
 
 function CommandBuilder(command) {
   this.command = command;
@@ -36,45 +36,11 @@ var Analyze = {
 
     client.analyze({bytecode: buildObj.deployedBytecode})
       .then(issues => {
-	exports.parseMythrilOutput(issues, buildObj)
+	mythril.parseMythrilOutput(issues, buildObj)
 	// console.log(issues)
       }).catch(err => {
 	console.log(err)
       })
-  }
-}
-
-exports.parseMythrilIssue = function (issue) {
-  const fields = ['type', 'contract', 'function', 'code', 'address', 'description']
-  for (let i in fields) {
-    let field = fields[i]
-    if (issue[field]) {
-      console.log(`${field}: ${issue[field]}`)
-    }
-  }
-}
-
-exports.parseMythrilOutput = function (issues, buildObj) {
-  // FIXME: we are using remix for parsing which uses
-  // a different AST format than truffle's JSON.
-  // For now we'll compile the contract.
-
-  let output = srcmap.compileContract(buildObj.source)
-  let ast = output.sources['test.sol']
-  console.log(ast)
-
-  let legacyAST = buildObj.legacyAST
-  console.log(legacyAST)
-
-  let sourceMap = buildObj.deployedSourceMap
-  for (let i in issues) {
-    let issue = issues[i]
-    let node = srcmap.isVariableDeclaration(issue.address, sourceMap, ast)
-    if (node && srcmap.isDynamicArray(node)) {
-      console.log(`skipping issue around dynamic array`)
-    } else {
-      parseMythrilIssue(issue)
-    }
   }
 }
 
