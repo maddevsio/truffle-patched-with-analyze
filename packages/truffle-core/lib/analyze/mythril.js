@@ -2,6 +2,28 @@ const srcmap = require('./srcmap.js');
 
 exports.print = console.log;
 
+/********************************************************
+Mythril messages currently need a bit of messaging to
+be able to work within the Eslint framework. Some things
+we handle here:
+
+- long messages
+  Chop at sentence boundary.
+- Non-ASCII characters: /[\u0001-\u001A]/
+  Remove them.
+**********************************************************/
+function massageMessage(mess) {
+  // Mythril messages are long. Strip after first period.
+  let sentMatch = mess.match('\\.[ \t\n]');
+  if (sentMatch) {
+    mess = mess.slice(0, sentMatch.index + 1);
+  }
+
+  // Remove characters that mess up table formatting
+  mess.replace(/[\u0001-\u001A]/, '');
+  return mess;
+}
+
 /*
 The eslint report format which we use, has these fields:
    line, column, severity, message, ruleId
@@ -20,9 +42,15 @@ exports.MythrilIssue2EsLint = function (issue) {
     return {line: 5, column: 6};
   }
 
+  /*
+     Mythril seems to downplay severity. What eslint calls an "error",
+     Mythril calls "warning". And what eslint calls "warning",
+     Mythril calls "informational".
+  */
   const myth2Severity = {
     Informational: 3,
     Information: 3,
+    Warning: 2,
   }
 
   const myth2EslintField = {
@@ -42,39 +70,39 @@ exports.MythrilIssue2EsLint = function (issue) {
     } else if (esField === 'severity') {
       esIssue[esField] = myth2Severity[value];
     } else if (esField === 'message') {
-      // Mythril messages are long. Strip after first period.
-      let sentenceEnd = value.indexOf('. ');
-      if (sentenceEnd != -1) {
-        value = value.slice(0, sentenceEnd+2);
-      }
-      esIssue[esField] = value;
+      esIssue[esField] = massageMessage(value);
     }
-    esIssue.ruleId = 'Mythril'
+    esIssue.ruleId = 'Mythril';
+    esIssue.fatal = false; // Mythril doesn't give fatal messages?
   }
   return esIssue;
 };
 
-exports.printMythrilIssue = function (issue) {
-  const fields = ['type', 'contract', 'function', 'code', 'address', 'description'];
-  for (let field of fields) {
-    if (issue[field]) {
-      exports.print(`${field}: ${issue[field]}`);
+// A debug routine
+function printMythrilIssues (issues) {
+  for (let issue of issues) {
+    const fields = ['type', 'contract', 'function', 'code', 'address', 'description'];
+    for (let field of fields) {
+      if (issue[field]) {
+        exports.print(`${field}: ${issue[field]}`);
+      }
     }
   }
 };
 
-exports.parseMythrilOutput = function (issues, buildObj) {
+exports.filterIssues = function (issues, buildObj) {
   // FIXME: we are using remix for parsing which uses
   // a different AST format than truffle's JSON.
   // For now we'll compile the contract.
 
   let output = srcmap.compileContract(buildObj.source);
   let ast = output.sources['test.sol'];
-  console.log(ast);
+  // console.log(ast);
 
   let legacyAST = buildObj.legacyAST;
-  console.log(legacyAST);
+  // console.log(legacyAST);
 
+  let filtered_issues = [];
   let sourceMap = buildObj.deployedSourceMap;
   for (let issue of issues) {
     let node = srcmap.isVariableDeclaration(issue.address, sourceMap, ast);
@@ -82,7 +110,8 @@ exports.parseMythrilOutput = function (issues, buildObj) {
       exports.print('Ignoring Mythril issue around ' +
 		    'dynamically allocated array');
     } else {
-      exports.printMythrilIssue(issue);
+      filtered_issues.push(issue)
     }
   }
+  return filtered_issues;
 };

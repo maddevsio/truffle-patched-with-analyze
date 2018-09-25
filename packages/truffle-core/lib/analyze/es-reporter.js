@@ -1,8 +1,9 @@
 // An eslint Reporter class. Objects of the Reporter class need
 // to have the methods listed below...
 class Reporter {
-  constructor(reports) {
-    this.reports = reports
+  constructor(reports, rootPath) {
+    this.reports = reports;
+    this.rootPath = rootPath;
   }
 
   get errorCount() {
@@ -21,8 +22,17 @@ class Reporter {
   get messages() {
     return this.reports.sort((x1, x2) => x1.line - x2.line);
   }
+
+  get filePath() {
+    return this.rootPath
+  }
+
 }
 
 Reporter.SEVERITY = Object.freeze({ ERROR: 2, WARN: 3 });
 
-module.exports = Reporter;
+exports.printReport = function(issues, rootPath, formatter, printFn) {
+  var reports = new Reporter(issues, rootPath);
+  var text = formatter([reports]);
+  printFn(text);
+}
