@@ -1,8 +1,8 @@
 'use strict';
 
-var SourceMappingDecoder = require('remix-lib/src/sourceMappingDecoder.js');
-var compilerInput = require('remix-lib/src/helpers/compilerHelper').compilerInput;
-var compiler = require('solc');
+const SourceMappingDecoder = require('remix-lib/src/sourceMappingDecoder.js');
+const compilerInput = require('remix-lib/src/helpers/compilerHelper').compilerInput;
+const compiler = require('solc');
 
 exports.compileContract = function (contracts) {
     var output = compiler.compileStandardWrapper(compilerInput(contracts));
@@ -10,7 +10,7 @@ exports.compileContract = function (contracts) {
 };
 
 exports.isVariableDeclaration = function (instIndex, sourceMap, ast) {
-    var sourceMappingDecoder = new SourceMappingDecoder();
+    const sourceMappingDecoder = new SourceMappingDecoder();
     return sourceMappingDecoder.findNodeAtInstructionIndex('VariableDeclaration',
         instIndex, sourceMap, ast);
 };

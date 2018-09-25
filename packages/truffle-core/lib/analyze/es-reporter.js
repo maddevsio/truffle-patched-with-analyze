@@ -32,7 +32,10 @@ class Reporter {
 Reporter.SEVERITY = Object.freeze({ ERROR: 2, WARN: 3 });
 
 exports.printReport = function(issues, rootPath, formatter, printFn) {
-  var reports = new Reporter(issues, rootPath);
-  var text = formatter([reports]);
-  printFn(text);
+  if (issues.length === 0) {
+    printFn("No issues found.");
+    return;
+  }
+  const reports = new Reporter(issues, rootPath);
+  printFn(formatter([reports]));
 }

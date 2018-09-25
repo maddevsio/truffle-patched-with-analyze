@@ -3,13 +3,13 @@ const srcmap = require('./srcmap.js');
 exports.print = console.log;
 
 /********************************************************
-Mythril messages currently need a bit of messaging to
+Mythril messages currently needs a bit of messaging to
 be able to work within the Eslint framework. Some things
 we handle here:
 
 - long messages
   Chop at sentence boundary.
-- Non-ASCII characters: /[\u0001-\u001A]/
+- Non-ASCII characters: /[\u0001-\u001A]/ (including \n)
   Remove them.
 **********************************************************/
 function massageMessage(mess) {
@@ -25,93 +25,115 @@ function massageMessage(mess) {
 }
 
 /*
-The eslint report format which we use, has these fields:
-   line, column, severity, message, ruleId
-
-but a Mythril JSON report has these fields:
-   address, type, description, contract, function,
-
-Convert a Mythril issue into an ESLint-style issue
-
+  Mythril seems to downplay severity. What eslint calls an "error",
+  Mythril calls "warning". And what eslint calls "warning",
+  Mythril calls "informational".
 */
-exports.MythrilIssue2EsLint = function (issue) {
+const myth2Severity = {
+  Informational: 3,
+  Information: 3,  // Not needed as of commit #7b4fe76
+  Warning: 2,
+};
+
+const myth2EslintField = {
+  type: 'severity',
+  address: 'addr2lineColumn', // Not used
+  description: 'message',
+}
+
+
+// FIXME figure out how to export this class.
+class Info {
+  constructor(issues, buildObj) {
+    this.issues = issues;
+    this.buildObj = buildObj
+
+    // FIXME: we are using remix for parsing which uses
+    // a different AST format than truffle's JSON.
+    // For now we'll compile the contract.
+
+    let output = srcmap.compileContract(buildObj.source);
+    this.ast = output.sources['test.sol'];
+    // console.log(this.ast);
+    this.legacyAST = buildObj.legacyAST;
+    // console.log(this.legacyAST);
+    this.sourceMap = buildObj.deployedSourceMap;
+  }
+
+  // Is this an issue that should be ignored?
+  isIgnorable(issue) {
+    let node = srcmap.isVariableDeclaration(issue.address, this.sourceMap,
+                                            this.ast);
+    if (node && srcmap.isDynamicArray(node)) {
+      exports.print('Ignoring Mythril issue around ' +
+		                'dynamically allocated array.');
+      return true;
+    } else {
+      return false;
+    }
+  };
 
   // FIXME: turn an EVM bytecode address into a line and column number(s)
-  function addr2lineColumn(address) {
+  addr2lineColumn(address) {
     // uses lineCol map.
     return {line: 5, column: 6};
   }
 
   /*
-     Mythril seems to downplay severity. What eslint calls an "error",
-     Mythril calls "warning". And what eslint calls "warning",
-     Mythril calls "informational".
+    The eslint report format which we use, has these fields:
+    line, column, severity, message, ruleId, fatal
+
+    but a Mythril JSON report has these fields:
+    address, type, description, contract, function,
+
+    Convert a Mythril issue into an ESLint-style issue
   */
-  const myth2Severity = {
-    Informational: 3,
-    Information: 3,
-    Warning: 2,
-  }
-
-  const myth2EslintField = {
-    type: 'severity',
-    address: addr2lineColumn,  // FIXME bind to fn with lineColMap
-    description: 'message',
-  }
-
-  let esIssue = {};
-  for (let field of Object.keys(myth2EslintField)) {
-    let esField = myth2EslintField[field];
-    let value = issue[field];
-    if (esField === addr2lineColumn) {
-      let lineCol = esField(value)
-      esIssue.line = lineCol.line;
-      esIssue.column = lineCol.column;
-    } else if (esField === 'severity') {
-      esIssue[esField] = myth2Severity[value];
-    } else if (esField === 'message') {
-      esIssue[esField] = massageMessage(value);
+  issue2EsLint(issue) {
+    let esIssue = {};
+    for (let field of ['type', 'address', 'description']) {
+      let esField = myth2EslintField[field];
+      let value = issue[field];
+      if (field === 'address') {
+        let lineCol = this.addr2lineColumn(value);
+        esIssue.line = lineCol.line;
+        esIssue.column = lineCol.column;
+      } else if (esField === 'severity') {
+        esIssue[esField] = myth2Severity[value];
+      } else if (esField === 'message') {
+        esIssue[esField] = massageMessage(value);
+      }
+      esIssue.ruleId = 'Mythril';
+      esIssue.fatal = false; // Mythril doesn't give fatal messages?
     }
-    esIssue.ruleId = 'Mythril';
-    esIssue.fatal = false; // Mythril doesn't give fatal messages?
+    return esIssue;
+  };
+}
+
+/* FIXME: since I don't know how to export Info as a class we have
+   this function which does everything and creates the an instance
+   object internally. This may or may not be what we want to do in the
+   future.
+*/
+// Turn Mythril Issues, into eslint-format issues.
+exports.issues2Eslint = function (issues, buildObj) {
+  let esIssues = [];
+  let info = new Info(issues, buildObj);
+  for (let issue of issues) {
+    if (!info.isIgnorable(issue)) {
+      esIssues.push(info.issue2EsLint(issue))
+    }
   }
-  return esIssue;
-};
+  return esIssues;
+}
 
 // A debug routine
-function printMythrilIssues (issues) {
+exports.printIssues = function(issues) {
   for (let issue of issues) {
-    const fields = ['type', 'contract', 'function', 'code', 'address', 'description'];
-    for (let field of fields) {
+    for (let field of
+         ['type', 'contract', 'function', 'code', 'address', 'description']) {
       if (issue[field]) {
         exports.print(`${field}: ${issue[field]}`);
       }
     }
   }
-};
-
-exports.filterIssues = function (issues, buildObj) {
-  // FIXME: we are using remix for parsing which uses
-  // a different AST format than truffle's JSON.
-  // For now we'll compile the contract.
-
-  let output = srcmap.compileContract(buildObj.source);
-  let ast = output.sources['test.sol'];
-  // console.log(ast);
-
-  let legacyAST = buildObj.legacyAST;
-  // console.log(legacyAST);
-
-  let filtered_issues = [];
-  let sourceMap = buildObj.deployedSourceMap;
-  for (let issue of issues) {
-    let node = srcmap.isVariableDeclaration(issue.address, sourceMap, ast);
-    if (node && srcmap.isDynamicArray(node)) {
-      exports.print('Ignoring Mythril issue around ' +
-		    'dynamically allocated array');
-    } else {
-      filtered_issues.push(issue)
-    }
-  }
-  return filtered_issues;
 };

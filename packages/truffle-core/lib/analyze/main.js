@@ -51,9 +51,8 @@ var Analyze = {
     client.analyze({bytecode: buildObj.deployedBytecode})
       .then(issues => {
 	const formatter = getFormatter(options.style);
-	let filteredIssues = mythril.filterIssues(issues, buildObj);
-	let esIssues = filteredIssues.map(mythril.MythrilIssue2EsLint);
-        // console.log(filteredIssues); // debug
+	let esIssues = mythril.issues2Eslint(issues, buildObj);
+        // console.log(esIssues); // debug
         esReporter.printReport(esIssues, root_dir, formatter, console.log);
       }).catch(err => {
         console.log(err);
