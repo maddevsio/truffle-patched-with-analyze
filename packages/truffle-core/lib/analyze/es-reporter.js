@@ -20,7 +20,11 @@ class Reporter {
 
 
   get messages() {
-    return this.reports.sort((x1, x2) => x1.line - x2.line);
+    return this.reports.sort(function(x1, x2) {
+      x1.line === x2.line ?
+	x1.column - x2.column :
+	x1.line - x2.line;
+    });
   }
 
   get filePath() {

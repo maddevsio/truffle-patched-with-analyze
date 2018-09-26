@@ -1,3 +1,4 @@
+const SourceMappingDecoder = require('remix-lib/src/sourceMappingDecoder.js');
 const srcmap = require('./srcmap.js');
 
 exports.print = console.log;
@@ -57,12 +58,20 @@ class Info {
     // console.log(this.ast);
     this.legacyAST = buildObj.legacyAST;
     // console.log(this.legacyAST);
-    this.sourceMap = buildObj.deployedSourceMap;
+    this.sourceMap = buildObj.sourceMap;
+    this.deployedSourceMap = buildObj.deployedSourceMap;
+    this.sourceMappingDecoder = new SourceMappingDecoder();
+    this.lineBreakPositions = this.sourceMappingDecoder
+      .getLinebreakPositions(buildObj.source);
+    this.offset2InstNum =
+      srcmap.makeOffset2InstNum(buildObj.deployedBytecode);
   }
 
   // Is this an issue that should be ignored?
   isIgnorable(issue) {
-    let node = srcmap.isVariableDeclaration(issue.address, this.sourceMap,
+    // FIXME: is issue.address correct or does it need to be turned into
+    // an instruction number?
+    let node = srcmap.isVariableDeclaration(issue.address, this.deployedSourceMap,
                                             this.ast);
     if (node && srcmap.isDynamicArray(node)) {
       exports.print('Ignoring Mythril issue around ' +
@@ -73,10 +82,25 @@ class Info {
     }
   };
 
-  // FIXME: turn an EVM bytecode address into a line and column number(s)
-  addr2lineColumn(address) {
-    // uses lineCol map.
-    return {line: 5, column: 6};
+  /*
+    Turn an bytecode offset into a line and column.
+    We are lossy here because we don't keep the end location.
+  */
+  byteOffset2lineColumn(bytecodeOffset) {
+    let instNum = this.offset2InstNum[bytecodeOffset];
+    let sourceLocation = this.sourceMappingDecoder
+        .atIndex(instNum, this.deployedSourceMap);
+    if (sourceLocation) {
+      const loc = this.sourceMappingDecoder
+            .convertOffsetToLineColumn(sourceLocation, this.lineBreakPositions);
+      // FIXME: note we are lossy in that we don't return the end location
+      if (loc.start) {
+        // Adjust because routines starts lines at 0 rather than 1.
+        loc.start.line++;
+      }
+      return loc.start;
+    }
+    return {line: -1, column: 0};
   }
 
   /*
@@ -94,7 +118,7 @@ class Info {
       let esField = myth2EslintField[field];
       let value = issue[field];
       if (field === 'address') {
-        let lineCol = this.addr2lineColumn(value);
+        let lineCol = this.byteOffset2lineColumn(value);
         esIssue.line = lineCol.line;
         esIssue.column = lineCol.column;
       } else if (esField === 'severity') {

@@ -53,7 +53,7 @@ var Analyze = {
 	const formatter = getFormatter(options.style);
 	let esIssues = mythril.issues2Eslint(issues, buildObj);
         // console.log(esIssues); // debug
-        esReporter.printReport(esIssues, root_dir, formatter, console.log);
+        esReporter.printReport(esIssues, solidityFile, formatter, console.log);
       }).catch(err => {
         console.log(err);
       });
