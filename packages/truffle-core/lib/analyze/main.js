@@ -19,15 +19,25 @@ function getFormatter(style) {
     }
 }
 
-/*  eslint no-unused-vars: 0 */ // for callback
 var Analyze = {
   analyze: function(options, callback) {
-    // console.log(require('util').inspect(options));
+    if (options.help) {
+      console.log(`usage: truffle analyze [options]
+
+runs Mythril Platform to on truffle project contract(s).
+
+options:
+    --style {stylish, unix, visualstudio, table}
+            formats output according to a standard eslint style.
+`);
+      return;
+    }
     const root_dir = options.working_directory;
     const buildDir = trufstuf.getBuildContractsDir(root_dir);
     const contractsDir = trufstuf.getContractsDir(root_dir);
 
     // Debug stuff
+    // console.log(require('util').inspect(options));
     // console.log(`Truffle project root: ${root_dir}`);
     // console.log(`Build directory is: ${buildDir}`);
     // console.log(`Contracts directory is: ${contractsDir}`);
@@ -50,12 +60,12 @@ var Analyze = {
 
     client.analyze({bytecode: buildObj.deployedBytecode})
       .then(issues => {
-	const formatter = getFormatter(options.style);
-	let esIssues = mythril.issues2Eslint(issues, buildObj);
+	      const formatter = getFormatter(options.style);
+	      let esIssues = mythril.issues2Eslint(issues, buildObj);
         // console.log(esIssues); // debug
         esReporter.printReport(esIssues, solidityFile, formatter, console.log);
       }).catch(err => {
-        console.log(err);
+        callback(err);
       });
   }
 };

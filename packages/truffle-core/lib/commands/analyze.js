@@ -1,6 +1,6 @@
 const command = {
   command: 'analyze',
-  description: 'Run Mythril Platform API analysis',
+  description: 'Run Mythril Platform analysis',
   builder: {},
   run: function (options, done) {
     const Config = require("truffle-config");
