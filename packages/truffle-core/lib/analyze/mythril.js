@@ -45,7 +45,7 @@ const myth2EslintField = {
 
 // FIXME figure out how to export this class.
 class Info {
-  constructor(issues, buildObj) {
+  constructor(issues, buildObj, options) {
     this.issues = issues;
     this.buildObj = buildObj
 
@@ -68,14 +68,16 @@ class Info {
   }
 
   // Is this an issue that should be ignored?
-  isIgnorable(issue) {
+  isIgnorable(issue, options) {
     // FIXME: is issue.address correct or does it need to be turned into
     // an instruction number?
     let node = srcmap.isVariableDeclaration(issue.address, this.deployedSourceMap,
                                             this.ast);
     if (node && srcmap.isDynamicArray(node)) {
-      exports.print('Ignoring Mythril issue around ' +
-		                'dynamically allocated array.');
+      if (options.debug) {
+        exports.print('**debug: Ignoring Mythril issue around ' +
+		                  'dynamically allocated array.');
+      }
       return true;
     } else {
       return false;
@@ -139,11 +141,11 @@ class Info {
    future.
 */
 // Turn Mythril Issues, into eslint-format issues.
-exports.issues2Eslint = function (issues, buildObj) {
+exports.issues2Eslint = function (issues, buildObj, options) {
   let esIssues = [];
   let info = new Info(issues, buildObj);
   for (let issue of issues) {
-    if (!info.isIgnorable(issue)) {
+    if (!info.isIgnorable(issue, options)) {
       esIssues.push(info.issue2EsLint(issue))
     }
   }

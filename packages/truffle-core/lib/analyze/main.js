@@ -1,3 +1,7 @@
+/* Main entry point for "truffle analyze".
+   Handles option processing, kicks off armlet, and
+   kicks off reporting when getting results.
+*/
 'use strict';
 
 const path = require('path');
@@ -22,16 +26,20 @@ function getFormatter(style) {
 var Analyze = {
   analyze: function(options, callback) {
     if (options.help) {
-      console.log(`usage: truffle analyze [options]
+      console.log(`usage: truffle analyze [options] [*solidity-file*]
 
 runs Mythril Platform to on truffle project contract(s).
 
 options:
     --style {stylish, unix, visualstudio, table}
             formats output according to a standard eslint style.
+
+You can specify a solidity file (assumed to be in the "contracts" directory. If
+one is not specified, we'll try figure it out ourselves.
 `);
       return;
     }
+
     const root_dir = options.working_directory;
     const buildDir = trufstuf.getBuildContractsDir(root_dir);
     const contractsDir = trufstuf.getContractsDir(root_dir);
@@ -43,11 +51,29 @@ options:
     // console.log(`Contracts directory is: ${contractsDir}`);
 
     const buildJson = trufstuf.guessTruffleBuildJson(buildDir);
-    const solidityFileBase = path.basename(buildJson, '.json');
-    const solidityFile = path.join(contractsDir, solidityFileBase + '.sol');
-    // console.log(`Solidity file is: ${solidityFile}`);
+    var solidityFileBase;
+    let solidityFile;
+    let buildJsonPath
 
-    let buildJsonPath = path.join(buildDir, buildJson);
+    try {
+
+      if (options._.length === 0) {
+	solidityFileBase = path.basename(buildJson, '.json');
+      } else {
+	solidityFileBase = options._[0];
+      }
+
+      if (! solidityFileBase.endsWith('.sol')) {
+	solidityFileBase += '.sol';
+      }
+
+      solidityFile = path.join(contractsDir, solidityFileBase);
+      console.log(`Solidity file used: ${solidityFile}`);
+      buildJsonPath = path.join(buildDir, buildJson);
+
+    } catch (err) {
+      callback(err);
+    }
 
     // console.log(`Reading ${buildJsonPath}`);
     let client = new armlet.Client(
@@ -61,7 +87,7 @@ options:
     client.analyze({bytecode: buildObj.deployedBytecode})
       .then(issues => {
 	      const formatter = getFormatter(options.style);
-	      let esIssues = mythril.issues2Eslint(issues, buildObj);
+	let esIssues = mythril.issues2Eslint(issues, buildObj, options);
         // console.log(esIssues); // debug
         esReporter.printReport(esIssues, solidityFile, formatter, console.log);
       }).catch(err => {
