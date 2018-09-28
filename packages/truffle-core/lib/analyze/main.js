@@ -31,13 +31,16 @@ var Analyze = {
 runs Mythril Platform to on truffle project contract(s).
 
 options:
-    --style {stylish, unix, visualstudio, table}
+    --style={stylish, unix, visualstudio, table}
             formats output according to a standard eslint style.
+    --debug={true, false}
+            Provide additional debug output
 
-You can specify a solidity file (assumed to be in the "contracts" directory. If
-one is not specified, we'll try figure it out ourselves.
+You can specify a solidity file which is assumed to be in the
+"contracts" directory. If one is not specified, we'll try figure it
+out ourselves.
 `);
-      return;
+      return callback(null, [], []);
     }
 
     const root_dir = options.working_directory;
@@ -58,17 +61,19 @@ one is not specified, we'll try figure it out ourselves.
     try {
 
       if (options._.length === 0) {
-	solidityFileBase = path.basename(buildJson, '.json');
+	      solidityFileBase = path.basename(buildJson, '.json');
       } else {
-	solidityFileBase = options._[0];
+	      solidityFileBase = options._[0];
       }
 
       if (! solidityFileBase.endsWith('.sol')) {
-	solidityFileBase += '.sol';
+	      solidityFileBase += '.sol';
       }
 
       solidityFile = path.join(contractsDir, solidityFileBase);
-      console.log(`Solidity file used: ${solidityFile}`);
+      if (options.debug) {
+        console.log(`Solidity file used: ${solidityFile}`);
+      }
       buildJsonPath = path.join(buildDir, buildJson);
 
     } catch (err) {
@@ -87,9 +92,10 @@ one is not specified, we'll try figure it out ourselves.
     client.analyze({bytecode: buildObj.deployedBytecode})
       .then(issues => {
 	      const formatter = getFormatter(options.style);
-	let esIssues = mythril.issues2Eslint(issues, buildObj, options);
+	      let esIssues = mythril.issues2Eslint(issues, buildObj, options);
         // console.log(esIssues); // debug
         esReporter.printReport(esIssues, solidityFile, formatter, console.log);
+        callback(null, [], []);
       }).catch(err => {
         callback(err);
       });

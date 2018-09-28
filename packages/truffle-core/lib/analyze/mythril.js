@@ -76,7 +76,7 @@ class Info {
     if (node && srcmap.isDynamicArray(node)) {
       if (options.debug) {
         exports.print('**debug: Ignoring Mythril issue around ' +
-		                  'dynamically allocated array.');
+		                  'dynamically-allocated array.');
       }
       return true;
     } else {
