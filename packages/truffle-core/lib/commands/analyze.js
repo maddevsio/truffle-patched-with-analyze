@@ -1,6 +1,14 @@
+const TA = require("../../../truffle-analyze");
 var command = {
   command: 'analyze',
   description: 'Run Mythril Platform on contracts',
+  builder: {
+    "compile-all": {
+      describe: "recompile all contracts",
+      type: "boolean",
+      default: false
+    },
+  },
   help: {
     usage: "truffle analyze [--debug] [--style <eslint style name>] [*solidity-file*]",
     options: [
@@ -11,26 +19,10 @@ var command = {
         option: "--style {stylish |unix | visualstudio | table}",
         description: `Set output format in the given es-lint style format \
         the migration file.`,
-      },{
-        option: "--network <name>",
-        description: "Specify the network to use, saving artifacts specific to that network. " +
-          "Network name must exist\n                    in the configuration.",
-      },{
-        option: "--compile-all",
-        description: "Compile all contracts instead of intelligently choosing which contracts need to " +
-          "be compiled.",
-      },{
-        option: "--verbose-rpc",
-        description: "Log communication between Truffle and the Ethereum client."
-      },{
-        option: "--interactive",
-        description: "Prompt to confirm that the user wants to proceed after the dry run.",
       },
     ]
   },
-  run: function (options, done) {
-    console.log("Hello from truffle analyze");
-  }
+  run: TA.run
 }
 
 module.exports = command;
