@@ -1,0 +1,3 @@
+[submodule "packages/truffle-analyze"]
+	path = packages/truffle-analyze
+	url = /src/external-vcs/github/consensys/truffle-analyze/
