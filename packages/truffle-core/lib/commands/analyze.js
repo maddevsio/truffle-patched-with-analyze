@@ -17,8 +17,7 @@ var command = {
         description: "Provide additional debug output",
       },{
         option: "--style {stylish |unix | visualstudio | table}",
-        description: `Set output format in the given es-lint style format \
-        the migration file.`,
+        description: `Set output format in the given es-lint style format the migration file.`,
       },
     ]
   },
