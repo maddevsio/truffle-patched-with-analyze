@@ -10,13 +10,17 @@ var command = {
     },
   },
   help: {
-    usage: "truffle analyze [--debug] [--style <eslint style name>] [*solidity-file*]",
+    usage: "truffle analyze [--mode={full|quick}] [--debug] [--style <eslint style name>] [*solidity-file*]",
     options: [
       {
+        option: "--mode {",
+        description: "Set analysis mode to be either quick (fast) or full (in depth)",
+      },{
         option: "--debug",
         description: "Provide additional debug output",
       },{
-        option: "--style {stylish |unix | visualstudio | table}",
+        option: `--style {stylish |unix | visualstudio | table | codeframe | tap | ...}
+See https://eslint.org/docs/user-guide/formatters/ for a full list.`,
         description: `Set output format in the given es-lint style format the migration file.`,
       },
     ]
