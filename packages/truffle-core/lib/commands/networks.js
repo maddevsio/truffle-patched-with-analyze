@@ -9,7 +9,7 @@ var command = {
     }
   },
   help: {
-    usage: "truffle networks [--clean]",
+    usage: "truffle+analyze networks [--clean]",
     options: [
       {
         option: "--clean",

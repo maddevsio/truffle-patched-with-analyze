@@ -52,7 +52,7 @@ var command = {
   description: 'Download a Truffle Box, a pre-built Truffle project',
   builder: {},
   help: {
-    usage: "truffle unbox [<box_name>] [--force]",
+    usage: "truffle+analyze unbox [<box_name>] [--force]",
     options: [
       {
         option: "<box_name>",

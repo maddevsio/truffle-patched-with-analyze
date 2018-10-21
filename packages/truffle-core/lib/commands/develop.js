@@ -11,7 +11,7 @@ var command = {
     }
   },
   help: {
-    usage: "truffle develop",
+    usage: "truffle+analyze develop",
     options: [],
   },
   runConsole: function(config, testrpcOptions, done) {

@@ -9,7 +9,7 @@ var command = {
     },
   },
   help: {
-    usage: "truffle test [<test_file>] [--compile-all] [--network <name>] [--verbose-rpc]",
+    usage: "truffle+analyze test [<test_file>] [--compile-all] [--network <name>] [--verbose-rpc]",
     options: [
       {
         option: "<test_file>",

@@ -3,7 +3,7 @@ var command = {
   description: 'Show version number and exit',
   builder: {},
   help: {
-    usage: "truffle version",
+    usage: "truffle+analyze version",
     options: [],
   },
   run: function (options, done) {
@@ -17,7 +17,7 @@ var command = {
       bundle_version = "(unbundled)";
     }
 
-    options.logger.log("Truffle " + bundle_version + " (core: " + version.core + ")");
+    options.logger.log("Truffle+Analyze " + bundle_version + " (core: " + version.core + ")");
     options.logger.log("Solidity v" + version.solc + " (solc-js)");
 
     done();

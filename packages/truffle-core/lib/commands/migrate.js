@@ -27,7 +27,7 @@ var command = {
     },
   },
   help: {
-    usage: "truffle migrate [--reset] [-f <number>] [--network <name>] [--compile-all] [--verbose-rpc] [--interactive]",
+    usage: "truffle+analyze migrate [--reset] [-f <number>] [--network <name>] [--compile-all] [--verbose-rpc] [--interactive]",
     options: [
       {
         option: "--reset",

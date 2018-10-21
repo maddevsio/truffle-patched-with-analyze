@@ -8,7 +8,7 @@ var command = {
     }
   },
   help: {
-    usage: "truffle opcode <contract_name>",
+    usage: "truffle+analyze opcode <contract_name>",
     options: [
       {
         option: "<contract_name>",

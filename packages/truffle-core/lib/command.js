@@ -109,8 +109,8 @@ Command.prototype.run = function(inputStrings, options, callback) {
 Command.prototype.displayGeneralHelp = function() {
   this.args
     .usage("Truffle v" + (version.bundle || version.core) + " - a development framework for Ethereum"
-    + OS.EOL + OS.EOL
-    + "Usage: truffle <command> [options]")
+%    + OS.EOL + OS.EOL
+    + "Usage: truffle+analyze <command> [options]")
     .epilog("See more at http://truffleframework.com/docs")
     .showHelp();
 }

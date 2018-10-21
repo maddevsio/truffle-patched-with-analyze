@@ -15,7 +15,7 @@ var command = {
     }
   },
   help: {
-    usage: "truffle exec <script.js> [--network <name>]",
+    usage: "truffle+analyze exec <script.js> [--network <name>]",
     options: [
       {
         option: "<script.js>",

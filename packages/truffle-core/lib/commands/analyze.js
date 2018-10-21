@@ -10,7 +10,7 @@ var command = {
     },
   },
   help: {
-    usage: "truffle analyze [--mode={full|quick}] [--debug] [--style <eslint style name>] [*solidity-file*]",
+    usage: "truffle+analyze analyze [--mode={full|quick}] [--debug] [--style <eslint style name>] [*solidity-file*]",
     options: [
       {
         option: "--mode {",

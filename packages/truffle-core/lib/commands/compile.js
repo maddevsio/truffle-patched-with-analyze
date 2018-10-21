@@ -21,7 +21,7 @@ var command = {
     }
   },
   help: {
-    usage: "truffle compile [--list <filter>] [--all] [--network <name>]",
+    usage: "truffle+analyze compile [--list <filter>] [--all] [--network <name>]",
     options: [
       {
         option: "--all",

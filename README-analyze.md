@@ -20,8 +20,9 @@ $ npm install seedrandom
 $ npm install bip39
 ```
 
-I don't know if `seedrandom` and `bip39` should be included in
-`truffle-core/packages.json` or if
+I don't think `seedrandom` and `bip39` should be included in
+`truffle-core/packages.json`. It think we are working around
+missing dependencies from other packages.
 
 
 Running

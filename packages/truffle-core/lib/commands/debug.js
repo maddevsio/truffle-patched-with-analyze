@@ -7,7 +7,7 @@ var command = {
     }
   },
   help: {
-    usage: "truffle debug <transaction_hash>",
+    usage: "truffle+analyze debug <transaction_hash>",
     options: [
       {
         option: "<transaction_hash>",
@@ -457,7 +457,7 @@ var command = {
               return;
             }
           }
-         
+
           //finally, if we've reached this point, do it!
           //also report back to the user on what happened
           if(setOrClear)
