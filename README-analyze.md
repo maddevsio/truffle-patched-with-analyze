@@ -5,8 +5,28 @@ This is a forked version of truffle "next" (as of v5 beta), which adds Mythril P
 
 The specific analyze function is pulled in as a git submodule in the github private consensys/truffle-analyze repo
 
-Setup
------
+Installation
+------------
+
+[Details here may change depending on how we decide to do things]
+
+Clone the repo. See below for how to do that.
+
+run
+
+```
+$ npm install --global <location-of-repo>
+```
+
+Right now `--global` (or `-g`) installation works. But that's what you want
+anyway, not local installation.
+
+In the future we may provide a tarball, or we could put this on https://npmjs.org .
+
+
+Developer Setup
+---------------
+
 
 If you clone this to get the submodules in place:
 
