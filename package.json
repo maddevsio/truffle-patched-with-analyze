@@ -1,22 +1,25 @@
 {
-  "private": true,
+  "name": "truffle-patched-analyze",
+  "version": "5.0.0-beta-analyze.5",
+  "description": "truffle patched with an 'analyze' command for Mythril Platform security analysis",
+  "bin": {
+    "truffle+analyze": "node_modules/truffle-core/cli.js"
+  },
+  "main": "node_modules/truffle-core/index.js",
   "scripts": {
-    "build:debugger": "cd packages/truffle-debugger && npm run build",
-    "lerna:bootstrap": "lerna bootstrap",
-    "bootstrap": "npm run lerna:bootstrap && npm run build:debugger",
-    "test": "lerna run test --stream --concurrency=1 -- --colors",
-    "ci": "./scripts/ci.sh",
-    "geth": "./scripts/geth.sh"
+    "postinstall": "patch-package",
+    "test": "echo \"no test specified\""
   },
-  "devDependencies": {
-    "coveralls": "^3.0.2",
-    "lerna": "^2.11.0",
-    "nyc": "^13.0.1"
-  },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
-  },
-  "dependencies": {}
+  "author": "Consensys",
+  "contributors": "Rocky Bernstein <rocky.bernstein@consensys.net>",
+  "license": "MIT",
+  "repository": "https://github.com/rocky/truffle-patched-with-analyze.git",
+  "dependencies": {
+    "armlet": "^0.2.1",
+    "patch-package": "^6.0.0-9",
+    "truffle-core": "^5.0.0-beta.1",
+    "truffle-analyze": "^0.9.1",
+    "seedrandom": "^2.4.4",
+    "bip39": "^2.5.0"
+  }
 }

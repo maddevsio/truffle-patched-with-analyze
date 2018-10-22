@@ -1,0 +1,279 @@
+diff --git a/node_modules/truffle-core/lib/commands/analyze.js b/node_modules/truffle-core/lib/commands/analyze.js
+new file mode 100644
+index 0000000..4740fc0
+--- /dev/null
++++ b/node_modules/truffle-core/lib/commands/analyze.js
+@@ -0,0 +1,31 @@
++const TA = require("../../../truffle-analyze");
++var command = {
++  command: 'analyze',
++  description: 'Run Mythril Platform on contracts',
++  builder: {
++    "compile-all": {
++      describe: "recompile all contracts",
++      type: "boolean",
++      default: false
++    },
++  },
++  help: {
++    usage: "truffle+analyze analyze [--mode={full|quick}] [--debug] [--style <eslint style name>] [*solidity-file*]",
++    options: [
++      {
++        option: "--mode {",
++        description: "Set analysis mode to be either quick (fast) or full (in depth)",
++      },{
++       option: "--debug",
++        description: "Provide additional debug output",
++      },{
++        option: `--style {stylish |unix | visualstudio | table | codeframe | tap | ...}
++See https://eslint.org/docs/user-guide/formatters/ for a full list.`,
++        description: `Set output format in the given es-lint style format the migration file.`
++      },
++    ]
++  },
++  run: TA.run
++}
++
++module.exports = command;
+diff --git a/node_modules/truffle-core/lib/commands/compile.js b/node_modules/truffle-core/lib/commands/compile.js
+index f4b2205..4bb2b38 100644
+--- a/node_modules/truffle-core/lib/commands/compile.js
++++ b/node_modules/truffle-core/lib/commands/compile.js
+@@ -21,7 +21,7 @@ var command = {
+     }
+   },
+   help: {
+-    usage: "truffle compile [--list <filter>] [--all] [--network <name>]",
++    usage: "truffle+analyze compile [--list <filter>] [--all] [--network <name>]",
+     options: [
+       {
+         option: "--all",
+diff --git a/node_modules/truffle-core/lib/commands/console.js b/node_modules/truffle-core/lib/commands/console.js
+index 999ef72..1648e22 100644
+--- a/node_modules/truffle-core/lib/commands/console.js
++++ b/node_modules/truffle-core/lib/commands/console.js
+@@ -3,7 +3,7 @@ var command = {
+   description: 'Run a console with contract abstractions and commands available',
+   builder: {},
+   help: {
+-    usage: "truffle console [--network <name>] [--verbose-rpc]",
++    usage: "truffle+analyze console [--network <name>] [--verbose-rpc]",
+     options: [
+       {
+         option: "--network <name>",
+diff --git a/node_modules/truffle-core/lib/commands/create.js b/node_modules/truffle-core/lib/commands/create.js
+index 8199590..9cee356 100644
+--- a/node_modules/truffle-core/lib/commands/create.js
++++ b/node_modules/truffle-core/lib/commands/create.js
+@@ -12,7 +12,7 @@ var command = {
+     }
+   },
+   help: {
+-    usage: "truffle create <artifact_type> <ArtifactName>",
++    usage: "truffle+analyze create <artifact_type> <ArtifactName>",
+     options: [
+       {
+         option: "<artifact_type>",
+diff --git a/node_modules/truffle-core/lib/commands/debug.js b/node_modules/truffle-core/lib/commands/debug.js
+index 72f0461..7a8671d 100644
+--- a/node_modules/truffle-core/lib/commands/debug.js
++++ b/node_modules/truffle-core/lib/commands/debug.js
+@@ -7,7 +7,7 @@ var command = {
+     }
+   },
+   help: {
+-    usage: "truffle debug <transaction_hash>",
++    usage: "truffle+analyze debug <transaction_hash>",
+     options: [
+       {
+         option: "<transaction_hash>",
+diff --git a/node_modules/truffle-core/lib/commands/deploy.js b/node_modules/truffle-core/lib/commands/deploy.js
+index cb81295..4ccce82 100644
+--- a/node_modules/truffle-core/lib/commands/deploy.js
++++ b/node_modules/truffle-core/lib/commands/deploy.js
+@@ -5,7 +5,7 @@ var command = {
+   description: '(alias for migrate)',
+   builder: migrate.builder,
+   help: {
+-    usage: "truffle deploy [--reset] [-f <number>] [--network <name>] [--compile-all] [--verbose-rpc]",
++    usage: "truffle+analyze deploy [--reset] [-f <number>] [--network <name>] [--compile-all] [--verbose-rpc]",
+     options: migrate.help.options,
+   },
+   run: migrate.run
+diff --git a/node_modules/truffle-core/lib/commands/develop.js b/node_modules/truffle-core/lib/commands/develop.js
+index 86bf364..9963f8e 100644
+--- a/node_modules/truffle-core/lib/commands/develop.js
++++ b/node_modules/truffle-core/lib/commands/develop.js
+@@ -11,7 +11,7 @@ var command = {
+     }
+   },
+   help: {
+-    usage: "truffle develop",
++    usage: "truffle+analyze develop",
+     options: [],
+   },
+   runConsole: function(config, testrpcOptions, done) {
+diff --git a/node_modules/truffle-core/lib/commands/exec.js b/node_modules/truffle-core/lib/commands/exec.js
+index 6eb8c58..48caf88 100644
+--- a/node_modules/truffle-core/lib/commands/exec.js
++++ b/node_modules/truffle-core/lib/commands/exec.js
+@@ -15,7 +15,7 @@ var command = {
+     }
+   },
+   help: {
+-    usage: "truffle exec <script.js> [--network <name>]",
++    usage: "truffle+analyze exec <script.js> [--network <name>]",
+     options: [
+       {
+         option: "<script.js>",
+diff --git a/node_modules/truffle-core/lib/commands/help.js b/node_modules/truffle-core/lib/commands/help.js
+index 1fce6c7..b3f0bd0 100644
+--- a/node_modules/truffle-core/lib/commands/help.js
++++ b/node_modules/truffle-core/lib/commands/help.js
+@@ -2,7 +2,7 @@ var command = {
+   command: "help",
+   description: "Display a list of all commands or information about a specific command",
+   help: {
+-    usage: "truffle help [<command>]",
++    usage: "truffle+analyze help [<command>]",
+     options: [
+       {
+         option: "<command>",
+diff --git a/node_modules/truffle-core/lib/commands/index.js b/node_modules/truffle-core/lib/commands/index.js
+index 8203c3f..fe8f202 100644
+--- a/node_modules/truffle-core/lib/commands/index.js
++++ b/node_modules/truffle-core/lib/commands/index.js
+@@ -4,6 +4,7 @@ module.exports = {
+   migrate: require("./migrate"),
+   deploy: require("./deploy"),
+   test: require("./test"),
++  analyze: require("./analyze"),
+   debug: require("./debug"),
+   opcode: require("./opcode"),
+   console: require("./console"),
+diff --git a/node_modules/truffle-core/lib/commands/init.js b/node_modules/truffle-core/lib/commands/init.js
+index 516f171..f65c459 100644
+--- a/node_modules/truffle-core/lib/commands/init.js
++++ b/node_modules/truffle-core/lib/commands/init.js
+@@ -3,7 +3,7 @@ var command = {
+   description: 'Initialize new and empty Ethereum project',
+   builder: {},
+   help: {
+-    usage: "truffle init [--force]",
++    usage: "truffle+analyze init [--force]",
+     options: [
+       {
+         option: "--force",
+diff --git a/node_modules/truffle-core/lib/commands/install.js b/node_modules/truffle-core/lib/commands/install.js
+index 9af1100..e4b0667 100644
+--- a/node_modules/truffle-core/lib/commands/install.js
++++ b/node_modules/truffle-core/lib/commands/install.js
+@@ -3,7 +3,7 @@ var command = {
+   description: 'Install a package from the Ethereum Package Registry',
+   builder: {},
+   help: {
+-    usage: "truffle install <package_name>[@<version>]",
++    usage: "truffle+analyze install <package_name>[@<version>]",
+     options: [
+       {
+         option: "package_name",
+diff --git a/node_modules/truffle-core/lib/commands/migrate.js b/node_modules/truffle-core/lib/commands/migrate.js
+index f419c11..f7fa26a 100644
+--- a/node_modules/truffle-core/lib/commands/migrate.js
++++ b/node_modules/truffle-core/lib/commands/migrate.js
+@@ -27,7 +27,7 @@ var command = {
+     },
+   },
+   help: {
+-    usage: "truffle migrate [--reset] [-f <number>] [--network <name>] [--compile-all] [--verbose-rpc] [--interactive]",
++    usage: "truffle+analyze migrate [--reset] [-f <number>] [--network <name>] [--compile-all] [--verbose-rpc] [--interactive]",
+     options: [
+       {
+         option: "--reset",
+diff --git a/node_modules/truffle-core/lib/commands/networks.js b/node_modules/truffle-core/lib/commands/networks.js
+index bb26e9c..3cd42f8 100644
+--- a/node_modules/truffle-core/lib/commands/networks.js
++++ b/node_modules/truffle-core/lib/commands/networks.js
+@@ -9,7 +9,7 @@ var command = {
+     }
+   },
+   help: {
+-    usage: "truffle networks [--clean]",
++    usage: "truffle+analyze networks [--clean]",
+     options: [
+       {
+         option: "--clean",
+diff --git a/node_modules/truffle-core/lib/commands/opcode.js b/node_modules/truffle-core/lib/commands/opcode.js
+index aba1390..dfd205e 100644
+--- a/node_modules/truffle-core/lib/commands/opcode.js
++++ b/node_modules/truffle-core/lib/commands/opcode.js
+@@ -8,7 +8,7 @@ var command = {
+     }
+   },
+   help: {
+-    usage: "truffle opcode <contract_name>",
++    usage: "truffle+analyze opcode <contract_name>",
+     options: [
+       {
+         option: "<contract_name>",
+diff --git a/node_modules/truffle-core/lib/commands/publish.js b/node_modules/truffle-core/lib/commands/publish.js
+index fd7b609..ffdbf9d 100644
+--- a/node_modules/truffle-core/lib/commands/publish.js
++++ b/node_modules/truffle-core/lib/commands/publish.js
+@@ -3,7 +3,7 @@ var command = {
+   description: 'Publish a package to the Ethereum Package Registry',
+   builder: {},
+   help: {
+-    usage: "truffle publish",
++    usage: "truffle+analyze publish",
+     options: [],
+   },
+   run: function (options, done) {
+diff --git a/node_modules/truffle-core/lib/commands/test.js b/node_modules/truffle-core/lib/commands/test.js
+index d065979..676062d 100644
+--- a/node_modules/truffle-core/lib/commands/test.js
++++ b/node_modules/truffle-core/lib/commands/test.js
+@@ -9,7 +9,7 @@ var command = {
+     },
+   },
+   help: {
+-    usage: "truffle test [<test_file>] [--compile-all] [--network <name>] [--verbose-rpc]",
++    usage: "truffle+analyze test [<test_file>] [--compile-all] [--network <name>] [--verbose-rpc]",
+     options: [
+       {
+         option: "<test_file>",
+diff --git a/node_modules/truffle-core/lib/commands/unbox.js b/node_modules/truffle-core/lib/commands/unbox.js
+index 6672de8..6131d35 100644
+--- a/node_modules/truffle-core/lib/commands/unbox.js
++++ b/node_modules/truffle-core/lib/commands/unbox.js
+@@ -52,7 +52,7 @@ var command = {
+   description: 'Download a Truffle Box, a pre-built Truffle project',
+   builder: {},
+   help: {
+-    usage: "truffle unbox [<box_name>] [--force]",
++    usage: "truffle+analyze unbox [<box_name>] [--force]",
+     options: [
+       {
+         option: "<box_name>",
+diff --git a/node_modules/truffle-core/lib/commands/version.js b/node_modules/truffle-core/lib/commands/version.js
+index 1ed3e1f..3a02e2f 100644
+--- a/node_modules/truffle-core/lib/commands/version.js
++++ b/node_modules/truffle-core/lib/commands/version.js
+@@ -3,7 +3,7 @@ var command = {
+   description: 'Show version number and exit',
+   builder: {},
+   help: {
+-    usage: "truffle version",
++    usage: "truffle+analyze version",
+     options: [],
+   },
+   run: function (options, done) {
+@@ -17,7 +17,7 @@ var command = {
+       bundle_version = "(unbundled)";
+     }
+ 
+-    options.logger.log("Truffle " + bundle_version + " (core: " + version.core + ")");
++    options.logger.log("Truffle+Analyze " + bundle_version + " (core: " + version.core + ")");
+     options.logger.log("Solidity v" + version.solc + " (solc-js)");
+ 
+     done();

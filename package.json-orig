@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "scripts": {
+    "build:debugger": "cd packages/truffle-debugger && npm run build",
+    "lerna:bootstrap": "lerna bootstrap",
+    "bootstrap": "npm run lerna:bootstrap && npm run build:debugger",
+    "test": "lerna run test --stream --concurrency=1 -- --colors",
+    "ci": "./scripts/ci.sh",
+    "geth": "./scripts/geth.sh"
+  },
+  "devDependencies": {
+    "coveralls": "^3.0.2",
+    "lerna": "^2.11.0",
+    "nyc": "^13.0.1"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "dependencies": {}
+}
