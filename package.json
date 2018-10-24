@@ -22,5 +22,9 @@
     "truffle-analyze": "^0.9.1",
     "seedrandom": "^2.4.4",
     "bip39": "^2.5.0"
+  },
+  "devDependencies": {
+    "imports-loader": "^0.8.0",
+    "shebang-loader": "0.0.1"
   }
 }

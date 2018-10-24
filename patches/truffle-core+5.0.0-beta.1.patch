@@ -3,18 +3,11 @@ new file mode 100644
 index 0000000..4740fc0
 --- /dev/null
 +++ b/node_modules/truffle-core/lib/commands/analyze.js
-@@ -0,0 +1,31 @@
+@@ -0,0 +1,24 @@
 +const TA = require("../../../truffle-analyze");
 +var command = {
 +  command: 'analyze',
-+  description: 'Run Mythril Platform on contracts',
-+  builder: {
-+    "compile-all": {
-+      describe: "recompile all contracts",
-+      type: "boolean",
-+      default: false
-+    },
-+  },
++  description: 'Run Mythril Platform analyses on a contract',
 +  help: {
 +    usage: "truffle+analyze analyze [--mode={full|quick}] [--debug] [--style <eslint style name>] [*solidity-file*]",
 +    options: [
@@ -268,12 +261,12 @@ index 1ed3e1f..3a02e2f 100644
      options: [],
    },
    run: function (options, done) {
-@@ -17,7 +17,7 @@ var command = {
+@@ -17,5 +17,5 @@ var command = {
        bundle_version = "(unbundled)";
      }
- 
+
 -    options.logger.log("Truffle " + bundle_version + " (core: " + version.core + ")");
 +    options.logger.log("Truffle+Analyze " + bundle_version + " (core: " + version.core + ")");
      options.logger.log("Solidity v" + version.solc + " (solc-js)");
- 
+
      done();

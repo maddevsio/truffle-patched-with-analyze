@@ -1,14 +1,7 @@
 const TA = require("../../../truffle-analyze");
 var command = {
   command: 'analyze',
-  description: 'Run Mythril Platform on contracts',
-  builder: {
-    "compile-all": {
-      describe: "recompile all contracts",
-      type: "boolean",
-      default: false
-    },
-  },
+  description: 'Run Mythril Platform analyses on a contract',
   help: {
     usage: "truffle+analyze analyze [--mode={full|quick}] [--debug] [--style <eslint style name>] [*solidity-file*]",
     options: [
