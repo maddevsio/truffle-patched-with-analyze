@@ -1,0 +1,9 @@
+.DS_Store
+.tern-port
+/build
+/tmp
+/truffle-plus-analyze-5.0.0-beta.*.tgz
+dependencies
+node_modules
+package-lock.json
+yarn.lock
