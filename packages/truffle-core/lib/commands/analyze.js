@@ -3,7 +3,7 @@ var command = {
   command: 'analyze',
   description: 'Run Mythril Platform analyses on a contract',
   help: {
-    usage: "truffle+analyze analyze [--mode={full|quick}] [--debug] [--style <eslint style name>] [*solidity-file*]",
+    usage: "truffle+analyze analyze [--mode={full|quick}] [--debug] [--style *eslint-style-name*] [*contract-name*]",
     options: [
       {
         option: "--mode {",
@@ -12,9 +12,9 @@ var command = {
         option: "--debug",
         description: "Provide additional debug output",
       },{
-        option: `--style {stylish |unix | visualstudio | table | codeframe | tap | ...}
-See https://eslint.org/docs/user-guide/formatters/ for a full list.`,
-        description: `Set output format in the given es-lint style format the migration file.`,
+        option: `--style {stylish | unix | visualstudio | table | tap | ...}`,
+        description: 'Set output format in the given es-lint style format the migration file. ' +
+          'See https://eslint.org/docs/user-guide/formatters/ for a full list.'
       },
     ]
   },
