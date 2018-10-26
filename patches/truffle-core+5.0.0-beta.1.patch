@@ -1,8 +1,54 @@
+diff --git a/node_modules/truffle-core/lib/command.js b/node_modules/truffle-core/lib/command.js
+index 2b7a20f..2fdaac4 100644
+--- a/node_modules/truffle-core/lib/command.js
++++ b/node_modules/truffle-core/lib/command.js
+@@ -108,9 +108,9 @@ Command.prototype.run = function(inputStrings, options, callback) {
+
+ Command.prototype.displayGeneralHelp = function() {
+   this.args
+-    .usage("Truffle v" + (version.bundle || version.core) + " - a development framework for Ethereum"
++    .usage("Truffle+Analyze v" + (version.bundle || version.core) + " - a development framework for Ethereum"
+     + OS.EOL + OS.EOL
+-    + "Usage: truffle <command> [options]")
++    + "Usage: truffle+analyze <command> [options]")
+     .epilog("See more at http://truffleframework.com/docs")
+     .showHelp();
+ }
 diff --git a/node_modules/truffle-core/lib/commands/analyze.js b/node_modules/truffle-core/lib/commands/analyze.js
+new file mode 100644
+index 0000000..be65631
+--- /dev/null
++++ b/node_modules/truffle-core/lib/commands/analyze.js
+@@ -0,0 +1,24 @@
++const TA = require("../../../truffle-analyze");
++var command = {
++  command: 'analyze',
++  description: 'Run Mythril Platform analyses on a contract',
++  help: {
++    usage: "truffle+analyze analyze [--mode={full|quick}] [--debug] [--style *eslint-style-name*] [*contract-name*]",
++    options: [
++      {
++        option: "--mode {",
++        description: "Set analysis mode to be either quick (fast) or full (in depth)",
++      },{
++        option: "--debug",
++        description: "Provide additional debug output",
++      },{
++        option: `--style {stylish | unix | visualstudio | table | tap | ...}`,
++        description: 'Set output format in the given es-lint style format the migration file. ' +
++          'See https://eslint.org/docs/user-guide/formatters/ for a full list.'
++      },
++    ]
++  },
++  run: TA.run
++}
++
++module.exports = command;
+diff --git a/node_modules/truffle-core/lib/commands/analyze.js~ b/node_modules/truffle-core/lib/commands/analyze.js~
 new file mode 100644
 index 0000000..4740fc0
 --- /dev/null
-+++ b/node_modules/truffle-core/lib/commands/analyze.js
++++ b/node_modules/truffle-core/lib/commands/analyze.js~
 @@ -0,0 +1,31 @@
 +const TA = require("../../../truffle-analyze");
 +var command = {
@@ -36,7 +82,7 @@ index 0000000..4740fc0
 +
 +module.exports = command;
 diff --git a/node_modules/truffle-core/lib/commands/compile.js b/node_modules/truffle-core/lib/commands/compile.js
-index f4b2205..4bb2b38 100644
+index f4b2205..203e7d1 100644
 --- a/node_modules/truffle-core/lib/commands/compile.js
 +++ b/node_modules/truffle-core/lib/commands/compile.js
 @@ -21,7 +21,7 @@ var command = {
@@ -49,7 +95,7 @@ index f4b2205..4bb2b38 100644
        {
          option: "--all",
 diff --git a/node_modules/truffle-core/lib/commands/console.js b/node_modules/truffle-core/lib/commands/console.js
-index 999ef72..1648e22 100644
+index 999ef72..77672bc 100644
 --- a/node_modules/truffle-core/lib/commands/console.js
 +++ b/node_modules/truffle-core/lib/commands/console.js
 @@ -3,7 +3,7 @@ var command = {
@@ -62,7 +108,7 @@ index 999ef72..1648e22 100644
        {
          option: "--network <name>",
 diff --git a/node_modules/truffle-core/lib/commands/create.js b/node_modules/truffle-core/lib/commands/create.js
-index 8199590..9cee356 100644
+index 8199590..68de8ee 100644
 --- a/node_modules/truffle-core/lib/commands/create.js
 +++ b/node_modules/truffle-core/lib/commands/create.js
 @@ -12,7 +12,7 @@ var command = {
@@ -75,7 +121,7 @@ index 8199590..9cee356 100644
        {
          option: "<artifact_type>",
 diff --git a/node_modules/truffle-core/lib/commands/debug.js b/node_modules/truffle-core/lib/commands/debug.js
-index 72f0461..7a8671d 100644
+index 72f0461..fcf2d6a 100644
 --- a/node_modules/truffle-core/lib/commands/debug.js
 +++ b/node_modules/truffle-core/lib/commands/debug.js
 @@ -7,7 +7,7 @@ var command = {
@@ -88,7 +134,7 @@ index 72f0461..7a8671d 100644
        {
          option: "<transaction_hash>",
 diff --git a/node_modules/truffle-core/lib/commands/deploy.js b/node_modules/truffle-core/lib/commands/deploy.js
-index cb81295..4ccce82 100644
+index cb81295..fd3b2e0 100644
 --- a/node_modules/truffle-core/lib/commands/deploy.js
 +++ b/node_modules/truffle-core/lib/commands/deploy.js
 @@ -5,7 +5,7 @@ var command = {
@@ -101,7 +147,7 @@ index cb81295..4ccce82 100644
    },
    run: migrate.run
 diff --git a/node_modules/truffle-core/lib/commands/develop.js b/node_modules/truffle-core/lib/commands/develop.js
-index 86bf364..9963f8e 100644
+index 86bf364..2d30596 100644
 --- a/node_modules/truffle-core/lib/commands/develop.js
 +++ b/node_modules/truffle-core/lib/commands/develop.js
 @@ -11,7 +11,7 @@ var command = {
@@ -114,7 +160,7 @@ index 86bf364..9963f8e 100644
    },
    runConsole: function(config, testrpcOptions, done) {
 diff --git a/node_modules/truffle-core/lib/commands/exec.js b/node_modules/truffle-core/lib/commands/exec.js
-index 6eb8c58..48caf88 100644
+index 6eb8c58..a8147b5 100644
 --- a/node_modules/truffle-core/lib/commands/exec.js
 +++ b/node_modules/truffle-core/lib/commands/exec.js
 @@ -15,7 +15,7 @@ var command = {
@@ -127,7 +173,7 @@ index 6eb8c58..48caf88 100644
        {
          option: "<script.js>",
 diff --git a/node_modules/truffle-core/lib/commands/help.js b/node_modules/truffle-core/lib/commands/help.js
-index 1fce6c7..b3f0bd0 100644
+index 1fce6c7..39dbbe5 100644
 --- a/node_modules/truffle-core/lib/commands/help.js
 +++ b/node_modules/truffle-core/lib/commands/help.js
 @@ -2,7 +2,7 @@ var command = {
@@ -152,7 +198,7 @@ index 8203c3f..fe8f202 100644
    opcode: require("./opcode"),
    console: require("./console"),
 diff --git a/node_modules/truffle-core/lib/commands/init.js b/node_modules/truffle-core/lib/commands/init.js
-index 516f171..f65c459 100644
+index 516f171..42ffb36 100644
 --- a/node_modules/truffle-core/lib/commands/init.js
 +++ b/node_modules/truffle-core/lib/commands/init.js
 @@ -3,7 +3,7 @@ var command = {
@@ -165,7 +211,7 @@ index 516f171..f65c459 100644
        {
          option: "--force",
 diff --git a/node_modules/truffle-core/lib/commands/install.js b/node_modules/truffle-core/lib/commands/install.js
-index 9af1100..e4b0667 100644
+index 9af1100..86a04bb 100644
 --- a/node_modules/truffle-core/lib/commands/install.js
 +++ b/node_modules/truffle-core/lib/commands/install.js
 @@ -3,7 +3,7 @@ var command = {
@@ -178,7 +224,7 @@ index 9af1100..e4b0667 100644
        {
          option: "package_name",
 diff --git a/node_modules/truffle-core/lib/commands/migrate.js b/node_modules/truffle-core/lib/commands/migrate.js
-index f419c11..f7fa26a 100644
+index f419c11..3fafd98 100644
 --- a/node_modules/truffle-core/lib/commands/migrate.js
 +++ b/node_modules/truffle-core/lib/commands/migrate.js
 @@ -27,7 +27,7 @@ var command = {
@@ -191,7 +237,7 @@ index f419c11..f7fa26a 100644
        {
          option: "--reset",
 diff --git a/node_modules/truffle-core/lib/commands/networks.js b/node_modules/truffle-core/lib/commands/networks.js
-index bb26e9c..3cd42f8 100644
+index bb26e9c..2c81328 100644
 --- a/node_modules/truffle-core/lib/commands/networks.js
 +++ b/node_modules/truffle-core/lib/commands/networks.js
 @@ -9,7 +9,7 @@ var command = {
@@ -204,7 +250,7 @@ index bb26e9c..3cd42f8 100644
        {
          option: "--clean",
 diff --git a/node_modules/truffle-core/lib/commands/opcode.js b/node_modules/truffle-core/lib/commands/opcode.js
-index aba1390..dfd205e 100644
+index aba1390..0bd4c57 100644
 --- a/node_modules/truffle-core/lib/commands/opcode.js
 +++ b/node_modules/truffle-core/lib/commands/opcode.js
 @@ -8,7 +8,7 @@ var command = {
@@ -217,7 +263,7 @@ index aba1390..dfd205e 100644
        {
          option: "<contract_name>",
 diff --git a/node_modules/truffle-core/lib/commands/publish.js b/node_modules/truffle-core/lib/commands/publish.js
-index fd7b609..ffdbf9d 100644
+index fd7b609..d74b200 100644
 --- a/node_modules/truffle-core/lib/commands/publish.js
 +++ b/node_modules/truffle-core/lib/commands/publish.js
 @@ -3,7 +3,7 @@ var command = {
@@ -230,7 +276,7 @@ index fd7b609..ffdbf9d 100644
    },
    run: function (options, done) {
 diff --git a/node_modules/truffle-core/lib/commands/test.js b/node_modules/truffle-core/lib/commands/test.js
-index d065979..676062d 100644
+index d065979..660d349 100644
 --- a/node_modules/truffle-core/lib/commands/test.js
 +++ b/node_modules/truffle-core/lib/commands/test.js
 @@ -9,7 +9,7 @@ var command = {
@@ -243,7 +289,7 @@ index d065979..676062d 100644
        {
          option: "<test_file>",
 diff --git a/node_modules/truffle-core/lib/commands/unbox.js b/node_modules/truffle-core/lib/commands/unbox.js
-index 6672de8..6131d35 100644
+index 6672de8..c48d79a 100644
 --- a/node_modules/truffle-core/lib/commands/unbox.js
 +++ b/node_modules/truffle-core/lib/commands/unbox.js
 @@ -52,7 +52,7 @@ var command = {
@@ -256,7 +302,7 @@ index 6672de8..6131d35 100644
        {
          option: "<box_name>",
 diff --git a/node_modules/truffle-core/lib/commands/version.js b/node_modules/truffle-core/lib/commands/version.js
-index 1ed3e1f..3a02e2f 100644
+index 1ed3e1f..56d7828 100644
 --- a/node_modules/truffle-core/lib/commands/version.js
 +++ b/node_modules/truffle-core/lib/commands/version.js
 @@ -3,7 +3,7 @@ var command = {
@@ -271,9 +317,9 @@ index 1ed3e1f..3a02e2f 100644
 @@ -17,7 +17,7 @@ var command = {
        bundle_version = "(unbundled)";
      }
- 
+
 -    options.logger.log("Truffle " + bundle_version + " (core: " + version.core + ")");
 +    options.logger.log("Truffle+Analyze " + bundle_version + " (core: " + version.core + ")");
      options.logger.log("Solidity v" + version.solc + " (solc-js)");
- 
+
      done();
