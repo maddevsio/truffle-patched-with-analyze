@@ -35,7 +35,7 @@ migrate` and `truffle+analyze test` to compile your contracts, deploy
 those contracts to the network, and run their associated unit tests.
 
 Additionally you can run `truffle+analyze analyze` to run the Mythril
-Platform to perform analyses. Some credential however need to be
+Platform to perform analyses. Some credentials however need to be
 set. That process is described elsewhere.
 
 Truffle comes bundled with a local development blockchain server that
