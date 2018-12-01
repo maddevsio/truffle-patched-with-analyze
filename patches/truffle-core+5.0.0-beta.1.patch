@@ -2,7 +2,7 @@ patch-package
 --- a/node_modules/truffle-core/lib/command.js
 +++ b/node_modules/truffle-core/lib/command.js
 @@ -108,9 +108,9 @@ Command.prototype.run = function(inputStrings, options, callback) {
- 
+
  Command.prototype.displayGeneralHelp = function() {
    this.args
 -    .usage("Truffle v" + (version.bundle || version.core) + " - a development framework for Ethereum"
@@ -20,7 +20,7 @@ new file mode 100644
 +const TA = require("../../../truffle-analyze");
 +var command = {
 +  command: 'analyze',
-+  description: 'Run Mythril Platform analyses on a contract',
++  description: 'Run MythOS analyses on a contract',
 +  help: {
 +    usage: `truffle+analyze analyze [options]`,
 +
@@ -38,7 +38,7 @@ new file mode 100644
 +          '                    See https://eslint.org/docs/user-guide/formatters/ for a full list.'
 +      },{
 +        option: '--timeout *seconds* ',
-+        description: 'Limit Mythril Platform analysis time to *s* seconds.\n' +
++        description: 'Limit MythOS analysis time to *s* seconds.\n' +
 +          '                    The default is 30 seconds.',
 +      },
 +    ]
@@ -247,9 +247,9 @@ new file mode 100644
 @@ -17,7 +17,7 @@ var command = {
        bundle_version = "(unbundled)";
      }
- 
+
 -    options.logger.log("Truffle " + bundle_version + " (core: " + version.core + ")");
 +    options.logger.log("Truffle+Analyze " + bundle_version + " (core: " + version.core + ")");
      options.logger.log("Solidity v" + version.solc + " (solc-js)");
- 
+
      done();

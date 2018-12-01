@@ -1,12 +1,12 @@
 {
   "name": "truffle-plus-analyze",
   "namespace": "consensys",
-  "version": "5.0.0-beta.1g",
+  "version": "5.0.0-beta.1h",
   "description": "Truffle - Simple development framework for Ethereum",
   "dependencies": {
     "mocha": "^4.1.0",
     "original-require": "1.0.1",
-    "solc": "0.4.25"
+    "solc": "^0.4.25"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^0.1.16",

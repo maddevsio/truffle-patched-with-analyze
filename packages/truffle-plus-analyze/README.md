@@ -2,8 +2,12 @@ Truffle-plus-analyze is forked/patched version of Truffle. It adds
 an "analyze" command to run check for security weaknesses and
 vulnerabilities via the [Mythril Platform](https://mythril.ai).
 
-*You will need Mythril credentials to run this. We expect to be giving limited access
-in December and January. We will keep you posted [here](https://mythril.ai/api-key).*
+*This package will be disappearing soon. We will be integrating in the
+upcoming truffle 5.0.0 "run" plugin system when it is stable.*
+
+
+*You will need MythOS credentials to run this. We expect to be giving limited access
+mid December and January. We will keep you posted [here](https://mythril.ai/api-key).*
 
 Truffle is a development environment, testing framework and asset
 pipeline for Ethereum, aiming to make life as an Ethereum developer
