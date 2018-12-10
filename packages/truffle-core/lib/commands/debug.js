@@ -23,6 +23,12 @@ var command = {
     var debug = debugModule("lib:commands:debug");
     var safeEval = require("safe-eval");
     var util = require("util");
+    const BN = require("bn.js");
+
+    // add custom inspect options for BNs
+    BN.prototype[util.inspect.custom] = function(depth, options) {
+      return options.stylize(this.toString(), "number");
+    };
 
     var compile = require("truffle-compile");
     var Config = require("truffle-config");
@@ -33,11 +39,8 @@ var command = {
     var selectors = require("truffle-debugger").selectors;
 
     // Debugger Session properties
-    var ast = selectors.ast;
-    var data = selectors.data;
     var trace = selectors.trace;
     var solidity = selectors.solidity;
-    var evm = selectors.evm;
     var controller = selectors.controller;
 
     var config = Config.detect(options);
@@ -58,7 +61,6 @@ var command = {
 
       var lastCommand = "n";
       var enabledExpressions = new Set();
-      var breakpoints = [];
 
       let compilePromise = new Promise(function(accept, reject) {
         compile.all(config, function(err, contracts, files) {
@@ -77,8 +79,6 @@ var command = {
         .then(function(result) {
           config.logger.log(DebugUtils.formatStartMessage());
 
-          debug("contracts %O", result.contracts);
-
           return Debugger.forTx(txHash, {
             provider: config.provider,
             files: result.files,
@@ -93,7 +93,8 @@ var command = {
                 sourceMap: contract.sourceMap,
                 deployedBinary:
                   contract.deployedBinary || contract.deployedBytecode,
-                deployedSourceMap: contract.deployedSourceMap
+                deployedSourceMap: contract.deployedSourceMap,
+                compiler: contract.compiler
               };
             })
           });
@@ -104,7 +105,7 @@ var command = {
         .catch(done);
 
       sessionPromise
-        .then(function(session) {
+        .then(async function(session) {
           if (err) return done(err);
 
           function splitLines(str) {
@@ -179,27 +180,39 @@ var command = {
             config.logger.log(DebugUtils.formatStack(step.stack));
           }
 
-          function printSelector(specified) {
-            var selector = specified
-              .split(".")
-              .filter(function(next) {
-                return next.length > 0;
-              })
-              .reduce(function(sel, next) {
-                debug("next %o, sel %o", next, sel);
-                return sel[next];
-              }, selectors);
+          function select(expr) {
+            let selector, result;
 
-            debug("selector %o", selector);
-            var result = session.view(selector);
-            var debugSelector = debugModule(specified);
+            try {
+              selector = expr
+                .split(".")
+                .filter(function(next) {
+                  return next.length > 0;
+                })
+                .reduce(function(sel, next) {
+                  return sel[next];
+                }, selectors);
+            } catch (_) {
+              throw new Error("Unknown selector: %s", expr);
+            }
+
+            // throws its own exception
+            result = session.view(selector);
+
+            return result;
+          }
+
+          /**
+           * @param {string} selector
+           */
+          function printSelector(selector) {
+            var result = select(selector);
+            var debugSelector = debugModule(selector);
             debugSelector.enabled = true;
             debugSelector("%O", result);
           }
 
           function printWatchExpressions() {
-            let source = session.view(solidity.current.source);
-
             if (enabledExpressions.size === 0) {
               config.logger.log("No watch expressions added.");
               return;
@@ -211,28 +224,31 @@ var command = {
             });
           }
 
-          function printWatchExpressionsResults() {
-            enabledExpressions.forEach(function(expression) {
-              config.logger.log(expression);
-              // Add some padding. Note: This won't work with all loggers,
-              // meaning it's not portable. But doing this now so we can get something
-              // pretty until we can build more architecture around this.
-              // Note: Selector results already have padding, so this isn't needed.
-              if (expression[0] == ":") {
-                process.stdout.write("  ");
-              }
-              printWatchExpressionResult(expression);
-            });
+          async function printWatchExpressionsResults() {
+            debug("enabledExpressions %o", enabledExpressions);
+            await Promise.all(
+              [...enabledExpressions].map(async expression => {
+                config.logger.log(expression);
+                // Add some padding. Note: This won't work with all loggers,
+                // meaning it's not portable. But doing this now so we can get something
+                // pretty until we can build more architecture around this.
+                // Note: Selector results already have padding, so this isn't needed.
+                if (expression[0] == ":") {
+                  process.stdout.write("  ");
+                }
+                await printWatchExpressionResult(expression);
+              })
+            );
           }
 
-          function printWatchExpressionResult(expression) {
+          async function printWatchExpressionResult(expression) {
             var type = expression[0];
             var exprArgs = expression.substring(1);
 
             if (type == "!") {
               printSelector(exprArgs);
             } else {
-              evalAndPrintExpression(exprArgs, 2, true);
+              await evalAndPrintExpression(exprArgs, 2, true);
             }
           }
 
@@ -258,8 +274,9 @@ var command = {
               .join(OS.EOL);
           }
 
-          function printVariables() {
-            var variables = session.view(data.current.identifiers.native);
+          async function printVariables() {
+            var variables = await session.variables();
+            debug("variables %o", variables);
 
             // Get the length of the longest name.
             var longestNameLength = Math.max.apply(
@@ -287,8 +304,38 @@ var command = {
             config.logger.log();
           }
 
-          function evalAndPrintExpression(expr, indent, suppress) {
-            var context = session.view(data.current.identifiers.native);
+          /**
+           * Convert all !<...> expressions to JS-valid selector requests
+           */
+          function preprocessSelectors(expr) {
+            const regex = /!<([^>]+)>/g;
+            const select = "$"; // expect repl context to have this func
+            const replacer = (_, selector) => `${select}("${selector}")`;
+
+            return expr.replace(regex, replacer);
+          }
+
+          /**
+           * @param {string} raw - user input for watch expression
+           *
+           * performs pre-processing on `raw`, using !<...> delimeters to refer
+           * to selector expressions.
+           *
+           * e.g., to see a particular part of the current trace step's stack:
+           *
+           *    debug(development:0x4228cdd1...)>
+           *
+           *        :!<trace.step.stack>[1]
+           */
+          async function evalAndPrintExpression(raw, indent, suppress) {
+            var context = Object.assign(
+              { $: select },
+
+              await session.variables()
+            );
+
+            const expr = preprocessSelectors(raw);
+
             try {
               var result = safeEval(expr, context);
               var formatted = formatValue(result, indent);
@@ -337,6 +384,17 @@ var command = {
               breakpoint.node = currentNode;
               breakpoint.line = currentLine;
               breakpoint.sourceId = currentSourceId;
+            }
+
+            //the special case of "B all"
+            else if (args[0] === "all") {
+              if (setOrClear) {
+                // only "B all" is legal, not "b all"
+                config.logger.log("Cannot add breakpoint everywhere.\n");
+                return;
+              }
+              session.removeAllBreakpoints();
+              return;
             }
 
             //if the argument starts with a "+" or "-", we have a relative
@@ -474,7 +532,7 @@ var command = {
             return;
           }
 
-          function interpreter(cmd, replContext, filename, callback) {
+          async function interpreter(cmd) {
             cmd = cmd.trim();
             var cmdArgs, splitArgs;
             debug("cmd %s", cmd);
@@ -502,7 +560,7 @@ var command = {
 
             //quit if that's what we were given
             if (cmd === "q") {
-              return repl.stop(callback);
+              return await util.promisify(repl.stop.bind(repl))();
             }
 
             let alreadyFinished = session.view(trace.finished);
@@ -569,7 +627,7 @@ var command = {
             switch (cmd) {
               case "+":
                 enabledExpressions.add(cmdArgs);
-                printWatchExpressionResult(cmdArgs);
+                await printWatchExpressionResult(cmdArgs);
                 break;
               case "-":
                 enabledExpressions.delete(cmdArgs);
@@ -581,7 +639,7 @@ var command = {
                 printWatchExpressions();
                 break;
               case "v":
-                printVariables();
+                await printVariables();
                 break;
               case ":":
                 evalAndPrintExpression(cmdArgs);
@@ -597,7 +655,7 @@ var command = {
                 printFile();
                 printInstruction();
                 printState();
-                printWatchExpressionsResults();
+                await printWatchExpressionsResults();
                 break;
               case "o":
               case "i":
@@ -612,7 +670,7 @@ var command = {
                   printFile();
                   printState();
                 }
-                printWatchExpressionsResults();
+                await printWatchExpressionsResults();
                 break;
               case "r":
                 printAddressesAffected();
@@ -627,6 +685,7 @@ var command = {
               cmd != "i" &&
               cmd != "u" &&
               cmd != "b" &&
+              cmd != "B" &&
               cmd != "v" &&
               cmd != "h" &&
               cmd != "p" &&
@@ -634,12 +693,11 @@ var command = {
               cmd != "!" &&
               cmd != ":" &&
               cmd != "+" &&
+              cmd != "r" &&
               cmd != "-"
             ) {
               lastCommand = cmd;
             }
-
-            callback();
           }
 
           printAddressesAffected();
@@ -659,7 +717,8 @@ var command = {
               ":" +
               txHash.substring(0, 10) +
               "...)> ",
-            interpreter: interpreter,
+            interpreter: util.callbackify(interpreter),
+            ignoreUndefined: true,
             done: done
           });
         })
